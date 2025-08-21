@@ -1,6 +1,5 @@
 import Dexie, { type Table } from 'dexie'
 import type {
-	User,
 	Portfolio,
 	Position,
 	Lot,
@@ -9,6 +8,7 @@ import type {
 	Comment,
 	Like,
 	PrivacySettings,
+    PriceQuote,
 } from '../models/types'
 
 export type UserRecord = {
@@ -26,6 +26,14 @@ export type FeedPostRecord = FeedPost
 export type CommentRecord = Comment
 export type LikeRecord = Like
 export type PrivacySettingsRecord = PrivacySettings
+export type AuditLogRecord = {
+	id: string
+	userId?: string
+	action: string
+	details?: any
+	ts: string
+}
+export type PriceQuoteRecord = PriceQuote
 
 class AppDatabase extends Dexie {
 	users!: Table<UserRecord, string>
@@ -37,6 +45,8 @@ class AppDatabase extends Dexie {
 	comments!: Table<CommentRecord, string>
 	likes!: Table<LikeRecord, string>
 	privacy!: Table<PrivacySettingsRecord, string>
+	auditLogs!: Table<AuditLogRecord, string>
+    quotes!: Table<PriceQuoteRecord, string>
 
 	constructor() {
 		super('portfoliohub')
@@ -67,6 +77,33 @@ class AppDatabase extends Dexie {
 			comments: 'id, postId, userId, createdAt',
 			likes: 'id, postId, userId, createdAt,&[postId+userId]',
 			privacy: 'userId',
+		})
+		// Audit logs
+		this.version(4).stores({
+			users: 'id,&displayName',
+			portfolios: 'id, userId, visibility',
+			positions: 'id, portfolioId, symbol, type, status',
+			lots: 'id, positionId, date',
+			dividends: 'id, positionId, exDate',
+			feedPosts: 'id, userId, createdAt, dedupeKey',
+			comments: 'id, postId, userId, createdAt',
+			likes: 'id, postId, userId, createdAt,&[postId+userId]',
+			privacy: 'userId',
+			auditLogs: 'id, ts',
+		})
+		// Quote cache
+		this.version(5).stores({
+			users: 'id,&displayName',
+			portfolios: 'id, userId, visibility',
+			positions: 'id, portfolioId, symbol, type, status',
+			lots: 'id, positionId, date',
+			dividends: 'id, positionId, exDate',
+			feedPosts: 'id, userId, createdAt, dedupeKey',
+			comments: 'id, postId, userId, createdAt',
+			likes: 'id, postId, userId, createdAt,&[postId+userId]',
+			privacy: 'userId',
+			auditLogs: 'id, ts',
+			quotes: 'symbol, asOf',
 		})
 	}
 }

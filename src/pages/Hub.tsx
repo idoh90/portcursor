@@ -4,6 +4,9 @@ import { db } from '../services/db'
 import { useQuotesBatch } from '../hooks/useQuotes'
 import { computePortfolioMetrics } from '../services/positions/plEngine'
 import { postBigMoveIfNeeded } from '../services/repos/bigMoveRepo'
+import Card from '../components/ui/Card'
+import PortfolioSummary from '../components/portfolio/PortfolioSummary'
+import Pinned from '../components/portfolio/PinnedTickers'
 
 function Hub() {
 	const [positions, setPositions] = useState<any[]>([])
@@ -37,41 +40,18 @@ function Hub() {
 	return (
 		<div className="space-y-4 pb-16">
 			<h1 className="text-xl font-semibold">Hub</h1>
-			<div className="grid grid-cols-3 gap-2">
-				<div className="rounded-lg border p-3 text-center">
-					<div className="text-xs text-gray-500">Unrealized</div>
-					<div className="font-semibold">${totals.totalUnrealized.toFixed(2)}</div>
-				</div>
-				<div className="rounded-lg border p-3 text-center">
-					<div className="text-xs text-gray-500">Realized</div>
-					<div className="font-semibold">${totals.totalRealized.toFixed(2)}</div>
-				</div>
-				<div className="rounded-lg border p-3 text-center">
-					<div className="text-xs text-gray-500">Today</div>
-					<div className="font-semibold">${totals.totalToday.toFixed(2)}</div>
-				</div>
-			</div>
-			<div className="rounded-lg border p-3">
-				<div className="mb-2 text-sm font-medium">Pinned</div>
-				<div className="flex gap-2">
-					{(portfolio?.pinnedSymbols ?? []).map((s) => (
-						<div key={s} className="rounded-md border px-3 py-2 text-sm">{s}</div>
-					))}
-					{(portfolio?.pinnedSymbols?.length ?? 0) === 0 && <div className="text-sm text-gray-500">No pinned tickers</div>}
-				</div>
-			</div>
-			<div className="rounded-lg border p-3">
-				<div className="mb-2 text-sm font-medium">Latest posts</div>
-				<ul className="space-y-1 text-sm">
-					{/* For brevity, still using demo. Social page shows full feed. */}
+			<PortfolioSummary totals={totals as any} />
+			<Pinned symbols={portfolio?.pinnedSymbols ?? []} />
+			<Card head="Latest posts">
+				<ul className="space-y-2 text-sm">
 					{demoPosts.map((p) => (
 						<li key={p.id} className="flex items-center justify-between">
 							<span>{p.displayName}</span>
-							<span className="text-gray-500">{p.symbol}</span>
+							<span className="text-zinc-500">{p.symbol}</span>
 						</li>
 					))}
 				</ul>
-			</div>
+			</Card>
 		</div>
 	)
 }

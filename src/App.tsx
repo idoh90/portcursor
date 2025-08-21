@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import './App.css'
+// Removed default Vite styles in favor of Tailwind dark theme
 import Layout from './components/layout/Layout'
 import Hub from './pages/Hub'
 import Social from './pages/Social'

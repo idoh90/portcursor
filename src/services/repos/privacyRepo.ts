@@ -9,6 +9,7 @@ export async function getPrivacy(userId: string): Promise<PrivacySettings | unde
 export async function upsertPrivacy(input: PrivacySettings): Promise<void> {
 	const p = privacySettingsSchema.parse(input)
 	await db.privacy.put(p)
+	await db.auditLogs.put({ id: `privacy:${p.userId}:${Date.now()}`, userId: p.userId, action: 'privacy.upsert', details: p, ts: new Date().toISOString() } as any)
 }
 
 

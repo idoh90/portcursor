@@ -53,6 +53,11 @@ export const privacySettingsSchema = z.object({
 	showTodayChange: z.boolean().optional(),
 	noIndex: z.boolean().optional(),
 	bigMoveThresholdPercent: z.number().nonnegative().max(100).optional(),
+	// Notification stubs and webhooks
+	notifyDailyDigest: z.boolean().optional(),
+	notifyAutoPostTypes: z.array(z.enum(['position_added','position_closed','big_move'])).optional(),
+	webhookDiscordUrl: z.string().url().optional(),
+	webhookTelegramBot: z.string().trim().min(1).optional(),
 })
 
 // Portfolio

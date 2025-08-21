@@ -35,6 +35,11 @@ export interface PrivacySettings {
 	showTodayChange?: boolean
 	noIndex?: boolean
 	bigMoveThresholdPercent?: number
+	// Notification stubs and webhooks
+	notifyDailyDigest?: boolean
+	notifyAutoPostTypes?: Array<'position_added' | 'position_closed' | 'big_move'>
+	webhookDiscordUrl?: string
+	webhookTelegramBot?: string
 }
 
 export interface Portfolio {

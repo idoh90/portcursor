@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+/* Dark app baseline */
+:root {
+	color-scheme: dark;
+}
+
+html, body, #root {
+	height: 100%;
+	background: #09090b; /* zinc-950 */
+	color: #e4e4e7; /* zinc-200 */
+}
+
+/* Utility tokens */
+.ph-container {
+	@apply mx-auto max-w-md px-4;
+}
+
+/* Scrollbar styling (WebKit) */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+*::-webkit-scrollbar-track { background: #0a0a0b; }

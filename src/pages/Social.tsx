@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import VirtualList from '../components/VirtualList'
 import { listFeed, toggleLike, countLikes, addComment } from '../services/repos/socialRepo'
 import { useAuthStore } from '../stores/authStore'
+import Button from '../components/ui/Button'
+import PostCard from '../components/social/PostCard'
+import CommentSection from '../components/social/CommentSection'
 
 type FeedItem = Awaited<ReturnType<typeof listFeed>>['items'][number]
 
@@ -14,7 +18,7 @@ function Social() {
 
 	useEffect(() => {
 		let cancelled = false
-		listFeed(20).then(async (res) => {
+		listFeed(20, undefined, user?.id).then(async (res) => {
 			if (cancelled) return
 			setItems(res.items)
 			setCursor(res.nextCursor)
@@ -22,12 +26,12 @@ function Social() {
 			setLikes(Object.fromEntries(entries))
 		})
 		return () => { cancelled = true }
-	}, [])
+	}, [user?.id])
 
 	const onLoadMore = async () => {
 		if (!cursor) return
 		setLoadingMore(true)
-		const res = await listFeed(20, cursor)
+		const res = await listFeed(20, cursor, user?.id)
 		setItems((prev) => [...prev, ...res.items])
 		setCursor(res.nextCursor)
 		const entries = await Promise.all(res.items.map((p) => countLikes(p.id).then((n) => [p.id, n] as const)))
@@ -59,35 +63,23 @@ function Social() {
 		}
 	}
 
+	const renderRow = (p: FeedItem) => (
+		<div key={p.id}>
+			<PostCard id={p.id} symbol={p.symbol} summary={p.summary} likes={likes[p.id] ?? 0} onLike={onToggleLike} />
+			<CommentSection postId={p.id} value={commentDraft[p.id] ?? ''} onChange={(v) => setCommentDraft((d) => ({ ...d, [p.id]: v }))} onSubmit={onSubmitComment} />
+		</div>
+	)
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 pb-16">
 			<h1 className="text-xl font-semibold">Social</h1>
-			<div className="space-y-3">
-				{items.map((p) => (
-					<div key={p.id} className="rounded-lg border p-3 space-y-2">
-						<div className="flex items-center justify-between text-sm">
-							<div className="font-medium">{p.symbol ?? 'Activity'}</div>
-							<button className="text-xs underline" onClick={() => onToggleLike(p.id)}>Like ({likes[p.id] ?? 0})</button>
-						</div>
-						<div className="text-sm">{p.summary}</div>
-						<div className="flex gap-2 pt-1">
-							<input
-								className="flex-1 rounded border px-2 py-1 text-sm"
-								placeholder="Write a comment"
-								value={commentDraft[p.id] ?? ''}
-								onChange={(e) => setCommentDraft((d) => ({ ...d, [p.id]: e.target.value }))} />
-							<button className="rounded bg-black px-3 py-1 text-white text-sm" onClick={() => onSubmitComment(p.id)}>Post</button>
-						</div>
-					</div>
-				))}
-			</div>
+			<VirtualList items={items} rowHeight={118} height={520} renderRow={(it) => renderRow(it)} />
 			<div className="pt-2">
 				{cursor ? (
-					<button disabled={loadingMore} onClick={onLoadMore} className="rounded border px-3 py-1 text-sm">
+					<Button variant="secondary" size="sm" disabled={loadingMore} onClick={onLoadMore}>
 						{loadingMore ? 'Loading…' : 'Load more'}
-					</button>
+					</Button>
 				) : (
-					<div className="text-sm text-gray-500">No more posts</div>
+					<div className="text-sm text-zinc-500">No more posts</div>
 				)}
 			</div>
 		</div>

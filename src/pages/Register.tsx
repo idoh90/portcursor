@@ -2,6 +2,9 @@ import { FormEvent, useState } from 'react'
 import { useAuthStore } from '../stores/authStore'
 import { Link, useNavigate } from 'react-router-dom'
 import { validateDisplayName, validatePin } from '../services/auth'
+import Card from '../components/ui/Card'
+import Input from '../components/ui/Input'
+import Button from '../components/ui/Button'
 
 function Register() {
 	 const [id, setId] = useState('')
@@ -37,25 +40,30 @@ function Register() {
 	 }
 
 	 return (
-		 <div className="space-y-4">
-			 <h1 className="text-xl font-semibold">Create Account</h1>
-			 <form onSubmit={onSubmit} className="space-y-3">
-				 <div className="space-y-1">
-					 <label className="text-sm text-gray-600">User ID</label>
-					 <input value={id} onChange={(e) => setId(e.target.value)} className="w-full rounded border px-3 py-2" placeholder="your unique id" />
+		 <div className="ph-container flex min-h-[70dvh] items-center justify-center">
+			 <Card className="w-full max-w-sm">
+				 <div className="mb-4 text-center">
+					 <h1 className="text-xl font-semibold tracking-tight">Create account</h1>
+					 <p className="mt-1 text-sm text-zinc-400">Join PortfolioHub</p>
 				 </div>
-				 <div className="space-y-1">
-					 <label className="text-sm text-gray-600">Display name</label>
-					 <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full rounded border px-3 py-2" placeholder="letters, numbers, _" />
-				 </div>
-				 <div className="space-y-1">
-					 <label className="text-sm text-gray-600">PIN</label>
-					 <input value={pin} onChange={(e) => setPin(e.target.value)} className="w-full rounded border px-3 py-2" placeholder="4-12 digits" inputMode="numeric" />
-				 </div>
-				 {(localError || error) && <div className="text-sm text-red-600">{localError || error}</div>}
-				 <button type="submit" disabled={loading} className="w-full rounded bg-black px-4 py-2 text-white disabled:opacity-60">{loading ? 'Creating...' : 'Create account'}</button>
-			 </form>
-			 <div className="text-sm text-gray-600">Already have an account? <Link className="underline" to="/login">Sign in</Link></div>
+				 <form onSubmit={onSubmit} className="space-y-3">
+					 <div className="space-y-1">
+						 <label className="text-xs text-zinc-400">User ID</label>
+						 <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="your unique id" />
+					 </div>
+					 <div className="space-y-1">
+						 <label className="text-xs text-zinc-400">Display name</label>
+						 <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="letters, numbers, _ . -" />
+					 </div>
+					 <div className="space-y-1">
+						 <label className="text-xs text-zinc-400">PIN</label>
+						 <Input value={pin} onChange={(e) => setPin(e.target.value)} placeholder="4-12 digits" inputMode="numeric" type="password" />
+					 </div>
+					 {(localError || error) && <div className="text-sm text-red-400">{localError || error}</div>}
+					 <Button type="submit" disabled={loading} className="w-full">{loading ? 'Creating...' : 'Create account'}</Button>
+				 </form>
+				 <div className="mt-4 text-center text-xs text-zinc-500">Already have an account? <Link className="underline" to="/login">Sign in</Link></div>
+			 </Card>
 		 </div>
 	 )
 }

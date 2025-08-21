@@ -66,3 +66,38 @@ export async function login(id: string, pin: string): Promise<AuthUser> {
 }
 
 
+export async function updateDisplayName(userId: string, newDisplayName: string): Promise<void> {
+	 const user = await db.users.get(userId)
+	 if (!user) throw new Error('User not found')
+	 const err = validateDisplayName(newDisplayName)
+	 if (err) throw new Error(err)
+	 const taken = await isDisplayNameTaken(newDisplayName)
+	 if (taken && user.displayName.toLowerCase() !== newDisplayName.trim().toLowerCase()) {
+		 throw new Error('Display name is already taken')
+	 }
+	 const trimmed = newDisplayName.trim()
+	 const next: UserRecord = { ...user, displayName: trimmed }
+	 await db.users.put(next)
+}
+
+export async function changePin(userId: string, oldPin: string, newPin: string): Promise<void> {
+	 const user = await db.users.get(userId)
+	 if (!user) throw new Error('User not found')
+	 const ok = await bcrypt.compare(oldPin, user.pinHash)
+	 if (!ok) throw new Error('Current PIN is incorrect')
+	 const err = validatePin(newPin)
+	 if (err) throw new Error(err)
+	 const newHash = await hashPin(newPin)
+	 const next: UserRecord = { ...user, pinHash: newHash }
+	 await db.users.put(next)
+}
+
+// Stub: In a real backend, this would invalidate all active sessions/tokens.
+export async function revokeAllSessions(userId: string): Promise<void> {
+	 const user = await db.users.get(userId)
+	 if (!user) throw new Error('User not found')
+	 const next: UserRecord = { ...user, sessionRevokedAt: new Date().toISOString() } as any
+	 await db.users.put(next)
+}
+
+

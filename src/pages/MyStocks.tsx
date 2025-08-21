@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { db } from '../services/db'
 import { useQuotesBatch } from '../hooks/useQuotes'
 import { computePositionMetrics } from '../services/positions/plEngine'
+import Card from '../components/ui/Card'
+import PositionCard from '../components/portfolio/PositionCard'
 
 function MyStocks() {
 	const [positions, setPositions] = useState<{ id: string; symbol: string }[]>([])
@@ -17,24 +19,26 @@ function MyStocks() {
 	const symbols = useMemo(() => positions.map((p) => p.symbol), [positions])
 	const quotes = useQuotesBatch(symbols)
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 pb-16">
 			<h1 className="text-xl font-semibold">My Stocks</h1>
 			<div className="space-y-2">
 				{positions.length === 0 ? (
-					<div className="rounded-lg border p-3 text-sm text-gray-500">No positions yet</div>
+					<Card className="text-sm text-zinc-500">No positions yet</Card>
 				) : (
 					positions.map((p) => {
 						const quote = quotes.get(p.symbol)
 						const lots = lotsByPosition[p.id] ?? []
 						const metrics = quote ? computePositionMetrics(lots, { last: quote.last, prevClose: quote.prevClose }, 'FIFO') : null
 						return (
-							<div key={p.id} className="rounded border p-2 flex items-center justify-between">
-								<div className="font-medium">{p.symbol}</div>
-								<div className="text-sm">Qty: {metrics?.quantity ?? '-'}</div>
-								<div className="text-sm">Avg: {metrics?.avgCost?.toFixed?.(2) ?? '-'}</div>
-								<div className="text-sm">Unreal: {metrics ? metrics.unrealizedPL.toFixed(2) : '-'}</div>
-								<div className="text-sm">Today: {metrics ? metrics.todayChange.toFixed(2) : '-'}</div>
-							</div>
+							<PositionCard
+								key={p.id}
+								symbol={p.symbol}
+								quantity={metrics?.quantity ?? null}
+								avgCost={metrics?.avgCost ?? null}
+								unrealized={metrics?.unrealizedPL ?? null}
+								today={metrics?.todayChange ?? null}
+								isStale={!quote || quote.last == null}
+							/>
 						)
 					})
 				)}

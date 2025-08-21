@@ -12,6 +12,7 @@ export async function togglePinnedSymbol(portfolioId: string, symbol: string): P
     }
     const next = Array.from(set)
     await db.portfolios.put({ ...pf, pinnedSymbols: next, updatedAt: new Date().toISOString() })
+    await db.auditLogs.put({ id: `pin:${pf.userId}:${Date.now()}`, userId: pf.userId, action: 'pinned.toggle', details: { portfolioId, symbol, pinned: set.has(symbol) }, ts: new Date().toISOString() } as any)
     return next
 }
 
@@ -20,6 +21,7 @@ export async function reorderPinnedSymbols(portfolioId: string, nextOrder: strin
     if (!pf) return
     if (nextOrder.length > 5) throw new Error('Maximum 5 pinned symbols')
     await db.portfolios.put({ ...pf, pinnedSymbols: nextOrder, updatedAt: new Date().toISOString() })
+    await db.auditLogs.put({ id: `pinReorder:${pf.userId}:${Date.now()}`, userId: pf.userId, action: 'pinned.reorder', details: { portfolioId, nextOrder }, ts: new Date().toISOString() } as any)
 }
 
 
