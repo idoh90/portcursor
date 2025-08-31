@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { type FormEvent, useState } from 'react'
 import { useAuthStore } from '../stores/authStore'
 import { Link, useNavigate } from 'react-router-dom'
 import Card from '../components/ui/Card'

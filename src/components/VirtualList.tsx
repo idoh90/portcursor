@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 type Props<T> = {
 	items: T[]
 	rowHeight: number
 	height: number
-	renderRow: (item: T, index: number) => JSX.Element
+	renderRow: (item: T, index: number) => ReactNode
 }
 
 export default function VirtualList<T>({ items, rowHeight, height, renderRow }: Props<T>) {

@@ -1,4 +1,4 @@
-import { demoPinned, demoPosts } from '../services/fixtures'
+import { demoPosts } from '../services/fixtures'
 import { useEffect, useMemo, useState } from 'react'
 import { db } from '../services/db'
 import { useQuotesBatch } from '../hooks/useQuotes'
