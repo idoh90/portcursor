@@ -25,9 +25,18 @@ const sizes: Record<ButtonSize, string> = {
 	lg: 'h-12 px-6 text-base',
 }
 
-export default function Button({ variant = 'primary', size = 'md', isLoading, className = '', children, ...rest }: PropsWithChildren<ButtonProps>) {
+export default function Button({ variant = 'primary', size = 'md', isLoading = false, className = '', children, ...rest }: PropsWithChildren<ButtonProps>) {
+	// Ensure we don't accidentally submit enclosing forms and prevent clicks while loading
+	const { type = 'button', disabled, ...others } = rest
+	const isDisabled = disabled || isLoading
+
 	return (
-		<button className={[base, variants[variant], sizes[size], className].join(' ')} {...rest}>
+		<button
+			type={type}
+			disabled={isDisabled}
+			className={[base, variants[variant], sizes[size], className].join(' ')}
+			{...others}
+		>
 			{isLoading ? (
 				<span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
 			) : null}
