@@ -20,12 +20,12 @@ function Profile() {
 	const [lotsByPos, setLotsByPos] = useState<Record<string, any[]>>({})
 
 	const viewingOwnProfile = !!authUser && authUser.displayName.toLowerCase() === String(name).toLowerCase()
-	if (isOwner !== viewingOwnProfile) {
+	useEffect(() => {
 		setOwner(viewingOwnProfile)
-	}
-	if (authUser && !isOwner) {
-		setViewingUserId(authUser.id)
-	}
+	}, [viewingOwnProfile, setOwner])
+	useEffect(() => {
+		if (authUser) setViewingUserId(authUser.id)
+	}, [authUser?.id, setViewingUserId])
 	useEffect(() => {
 		// Resolve profile user id from displayName
 		db.users.where('displayName').equalsIgnoreCase(String(name ?? '')).first().then((u) => {

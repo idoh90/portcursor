@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import VirtualList from '../components/VirtualList'
 import { listFeed, toggleLike, countLikes, addComment } from '../services/repos/socialRepo'
 import { useAuthStore } from '../stores/authStore'
@@ -15,6 +15,8 @@ function Social() {
 	const [likes, setLikes] = useState<Record<string, number>>({})
 	const [commentDraft, setCommentDraft] = useState<Record<string, string>>({})
 	const [loadingMore, setLoadingMore] = useState(false)
+	const containerRef = useRef<HTMLDivElement>(null)
+	const [listHeight, setListHeight] = useState(520)
 
 	useEffect(() => {
 		let cancelled = false
@@ -27,6 +29,18 @@ function Social() {
 		})
 		return () => { cancelled = true }
 	}, [user?.id])
+
+	useEffect(() => {
+		const recalc = () => {
+			const top = containerRef.current?.getBoundingClientRect().top ?? 0
+			const bottomPadding = 88
+			const h = Math.max(240, Math.floor(window.innerHeight - top - bottomPadding))
+			setListHeight(h)
+		}
+		recalc()
+		window.addEventListener('resize', recalc)
+		return () => window.removeEventListener('resize', recalc)
+	}, [items.length])
 
 	const onLoadMore = async () => {
 		if (!cursor) return
@@ -72,7 +86,9 @@ function Social() {
 	return (
 		<div className="space-y-4 pb-16">
 			<h1 className="text-xl font-semibold">Social</h1>
-			<VirtualList items={items} rowHeight={118} height={520} renderRow={(it) => renderRow(it)} />
+			<div ref={containerRef}>
+				<VirtualList items={items} rowHeight={118} height={listHeight} renderRow={(it) => renderRow(it)} />
+			</div>
 			<div className="pt-2">
 				{cursor ? (
 					<Button variant="secondary" size="sm" disabled={loadingMore} onClick={onLoadMore}>

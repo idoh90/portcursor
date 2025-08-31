@@ -14,8 +14,8 @@ export default function PositionCard({ symbol, quantity, avgCost, unrealized, to
 	const todayClass = (today ?? 0) > 0 ? 'text-emerald-400' : (today ?? 0) < 0 ? 'text-red-400' : 'text-zinc-200'
 	return (
 		<Card className={[isStale ? 'opacity-70' : 'opacity-100'].join(' ')}>
-			<div className="flex items-center justify-between">
-				<div className="font-medium text-zinc-200">{symbol}</div>
+			<div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+				<div className="font-medium text-zinc-200 mr-auto">{symbol}</div>
 				<div className="text-sm text-zinc-400">Qty: {quantity ?? '-'}</div>
 				<div className="text-sm text-zinc-400">Avg: {avgCost != null ? avgCost.toFixed(2) : '-'}</div>
 				<div className={["text-sm", unrealClass].join(' ')}>Unreal: {unrealized != null ? unrealized.toFixed(2) : '-'}</div>

@@ -10,12 +10,12 @@ const items = [
 function BottomNav() {
 	const { pathname } = useLocation()
 	return (
-		<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-800 bg-zinc-950/80 backdrop-blur">
+		<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-800 bg-zinc-950/80 backdrop-blur" aria-label="Primary">
 			<div className="mx-auto grid max-w-md grid-cols-4 text-center text-xs">
 				{items.map((it) => {
 					const active = pathname === it.to
 					return (
-						<Link key={it.to} to={it.to} className={['p-3', active ? 'text-indigo-400' : 'text-zinc-400 hover:text-zinc-200'].join(' ')}>
+						<Link key={it.to} to={it.to} className={['p-3', active ? 'text-indigo-400' : 'text-zinc-400 hover:text-zinc-200'].join(' ')} aria-current={active ? 'page' : undefined}>
 							{it.label}
 						</Link>
 					)
