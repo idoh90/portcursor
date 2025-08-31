@@ -72,7 +72,7 @@ function Social() {
 	return (
 		<div className="space-y-4 pb-16">
 			<h1 className="text-xl font-semibold">Social</h1>
-			<VirtualList items={items} rowHeight={118} height={520} renderRow={(it) => renderRow(it)} />
+			<VirtualList ariaRole="feed" ariaLabel="Social feed" items={items} rowHeight={118} height={520} renderRow={(it) => renderRow(it)} />
 			<div className="pt-2">
 				{cursor ? (
 					<Button variant="secondary" size="sm" disabled={loadingMore} onClick={onLoadMore}>

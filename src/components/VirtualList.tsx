@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type React from 'react'
 
 type Props<T> = {
 	items: T[]
 	rowHeight: number
 	height: number
-	renderRow: (item: T, index: number) => JSX.Element
+	renderRow: (item: T, index: number) => React.ReactElement
+	ariaRole?: 'list' | 'feed' | 'tree' | 'table'
+	ariaLabel?: string
 }
 
-export default function VirtualList<T>({ items, rowHeight, height, renderRow }: Props<T>) {
+export default function VirtualList<T>({ items, rowHeight, height, renderRow, ariaRole = 'list', ariaLabel }: Props<T>) {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [scrollTop, setScrollTop] = useState(0)
 	useEffect(() => {
@@ -22,11 +25,16 @@ export default function VirtualList<T>({ items, rowHeight, height, renderRow }: 
 	const end = Math.min(items.length, Math.ceil((scrollTop + height) / rowHeight) + 5)
 	const slice = useMemo(() => items.slice(start, end), [items, start, end])
 	return (
-		<div ref={containerRef} style={{ height, overflowY: 'auto', position: 'relative' }}>
+		<div
+			ref={containerRef}
+			style={{ height, overflowY: 'auto', position: 'relative' }}
+			role={ariaRole}
+			aria-label={ariaLabel}
+		>
 			<div style={{ height: total }} />
 			<div style={{ position: 'absolute', top: start * rowHeight, left: 0, right: 0 }}>
 				{slice.map((item, i) => (
-					<div key={start + i} style={{ height: rowHeight }}>
+					<div key={start + i} style={{ height: rowHeight }} role={ariaRole === 'list' || ariaRole === 'feed' ? 'listitem' : undefined}>
 						{renderRow(item, start + i)}
 					</div>
 				))}

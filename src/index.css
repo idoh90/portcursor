@@ -11,6 +11,9 @@ html, body, #root {
 	color: #e4e4e7; /* zinc-200 */
 }
 
+/* Prevent layout shift when scrollbars appear */
+html { scrollbar-gutter: stable; }
+
 /* Utility tokens */
 .ph-container {
 	@apply mx-auto max-w-md px-4;
