@@ -1,5 +1,4 @@
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
-import React from 'react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
@@ -25,11 +24,19 @@ const sizes: Record<ButtonSize, string> = {
 	lg: 'h-12 px-6 text-base',
 }
 
-export default function Button({ variant = 'primary', size = 'md', isLoading, className = '', children, ...rest }: PropsWithChildren<ButtonProps>) {
+export default function Button({ variant = 'primary', size = 'md', isLoading, className = '', children, type, disabled, ...rest }: PropsWithChildren<ButtonProps>) {
+	const isBusy = !!isLoading
+	const computedType = type ?? 'button'
 	return (
-		<button className={[base, variants[variant], sizes[size], className].join(' ')} {...rest}>
-			{isLoading ? (
-				<span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+		<button
+			type={computedType}
+			aria-busy={isBusy || undefined}
+			disabled={disabled || isBusy}
+			className={[base, variants[variant], sizes[size], className].join(' ')}
+			{...rest}
+		>
+			{isBusy ? (
+				<span aria-hidden className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
 			) : null}
 			{children}
 		</button>

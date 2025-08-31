@@ -10,11 +10,12 @@ export interface PostCardProps {
 }
 
 export default function PostCard({ id, symbol, summary, likes, onLike }: PostCardProps) {
+	const aria = `Like ${symbol ?? 'post'} (${likes} ${likes === 1 ? 'like' : 'likes'})`
 	return (
 		<Card className="space-y-2">
 			<div className="flex items-center justify-between text-sm">
 				<div className="font-medium">{symbol ?? 'Activity'}</div>
-				<Button variant="ghost" size="sm" onClick={() => onLike(id)}>Like ({likes})</Button>
+				<Button aria-label={aria} variant="ghost" size="sm" onClick={() => onLike(id)}>Like ({likes})</Button>
 			</div>
 			<div className="text-sm">{summary}</div>
 		</Card>

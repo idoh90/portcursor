@@ -14,7 +14,7 @@ export default function OfflineBanner() {
 	}, [])
 	if (!offline) return null
 	return (
-		<div className="sticky top-0 z-50 w-full bg-amber-900/70 px-4 py-2 text-center text-xs text-amber-200">
+		<div role="status" aria-live="polite" className="sticky top-0 z-50 w-full bg-amber-900/70 px-4 py-2 text-center text-xs text-amber-200">
 			You are offline. Showing last known data.
 		</div>
 	)
