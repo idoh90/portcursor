@@ -1,5 +1,19 @@
-import bcrypt from 'bcryptjs'
 import { db, type UserRecord } from './db'
+
+// Simple hash function for demo purposes (not secure, just for development)
+async function simpleHash(input: string): Promise<string> {
+	const encoder = new TextEncoder()
+	const data = encoder.encode(input)
+	const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+	const hashArray = Array.from(new Uint8Array(hashBuffer))
+	return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// Simple comparison function
+async function compareHash(input: string, hash: string): Promise<boolean> {
+	const inputHash = await simpleHash(input)
+	return inputHash === hash
+}
 
 export type RegisterInput = {
 	 id: string
@@ -30,8 +44,7 @@ export function validatePin(pin: string): string | null {
 }
 
 export async function hashPin(pin: string): Promise<string> {
-	 const salt = await bcrypt.genSalt(10)
-	 return bcrypt.hash(pin, salt)
+	 return simpleHash(pin)
 }
 
 export async function isDisplayNameTaken(displayName: string): Promise<boolean> {
@@ -60,7 +73,7 @@ export async function register(input: RegisterInput): Promise<AuthUser> {
 export async function login(id: string, pin: string): Promise<AuthUser> {
 	 const user = await db.users.get(id)
 	 if (!user) throw new Error('User not found')
-	 const ok = await bcrypt.compare(pin, user.pinHash)
+	 const ok = await compareHash(pin, user.pinHash)
 	 if (!ok) throw new Error('Invalid PIN')
 	 return { id: user.id, displayName: user.displayName, createdAt: user.createdAt }
 }
@@ -83,7 +96,7 @@ export async function updateDisplayName(userId: string, newDisplayName: string):
 export async function changePin(userId: string, oldPin: string, newPin: string): Promise<void> {
 	 const user = await db.users.get(userId)
 	 if (!user) throw new Error('User not found')
-	 const ok = await bcrypt.compare(oldPin, user.pinHash)
+	 const ok = await compareHash(oldPin, user.pinHash)
 	 if (!ok) throw new Error('Current PIN is incorrect')
 	 const err = validatePin(newPin)
 	 if (err) throw new Error(err)

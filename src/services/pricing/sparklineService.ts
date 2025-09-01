@@ -1,5 +1,5 @@
 import { differenceInMinutes } from 'date-fns'
-import { getCachedQuote, getQuote, getEffectivePrice } from './priceService'
+import { getLocalCachedQuote, getQuote, getEffectivePrice } from './priceService'
 
 type SparkKey = string
 
@@ -22,7 +22,7 @@ export async function getSparkline(symbol: string, windowDays: 7 | 30, ttlMinute
 		return cached.values
 	}
 	// No historical provider yet: fallback to last/prevClose and synthesize a flat series
-	let price = getCachedQuote(symbol)
+	let price = getLocalCachedQuote(symbol)
 	try {
 		if (!price) price = await getQuote(symbol)
 	} catch {

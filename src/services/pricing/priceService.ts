@@ -4,10 +4,11 @@ import { flag } from '../flags'
 import { trackMetric, trackError } from '../telemetry'
 import type { PriceQuote } from '../../models/types'
 import { priceQuoteSchema, tickerSchema } from '../../models/schemas'
+import { getCachedQuote, setCachedQuote, getCachedQuotes, setCachedQuotes } from './cacheManager'
+import { unifiedQuote, unifiedQuoteBatch } from './providers/unifiedProvider'
 
 type QuoteProvider = (symbol: string) => Promise<PriceQuote>
 
-const cache = new Map<string, PriceQuote>()
 const cacheTtlSecondsDefault = 30
 
 let provider: QuoteProvider | undefined
@@ -24,8 +25,10 @@ export function setQuoteProvider(p: QuoteProvider) {
 
 export async function getQuote(symbol: string, cacheTtlSeconds = cacheTtlSecondsDefault): Promise<PriceQuote> {
 	const s = tickerSchema.parse(symbol)
-	const cached = cache.get(s)
+	// Check memory cache first (from cacheManager)
+	const cached = getCachedQuote(s)
 	if (cached && differenceInSeconds(new Date(), new Date(cached.asOf)) <= cacheTtlSeconds) {
+		trackMetric({ name: 'quote.cache.memory.hit', value: 1, tags: { symbol: s } })
 		return cached
 	}
 	// Try persistent cache first (feature-flagged)
@@ -33,14 +36,17 @@ export async function getQuote(symbol: string, cacheTtlSeconds = cacheTtlSeconds
 		try {
 			const dbCached = await (db as any).quotes?.get(s)
 			if (dbCached && differenceInSeconds(new Date(), new Date(dbCached.asOf)) <= cacheTtlSeconds) {
-				cache.set(s, dbCached)
+				setCachedQuote(dbCached, cacheTtlSeconds)
 				trackMetric({ name: 'quote.cache.db.hit', value: 1, tags: { symbol: s } })
 				return dbCached
 			}
 			trackMetric({ name: 'quote.cache.db.miss', value: 1, tags: { symbol: s } })
 		} catch {}
 	}
-	if (!provider) throw new Error('Quote provider not configured')
+	// Use unified provider if no custom provider is set
+	if (!provider) {
+		provider = unifiedQuote
+	}
 	if (circuitOpenUntil && Date.now() < circuitOpenUntil) {
 		if (cached) return cached
 		throw new Error('Price service temporarily unavailable')
@@ -55,7 +61,7 @@ export async function getQuote(symbol: string, cacheTtlSeconds = cacheTtlSeconds
 		const q = priceQuoteSchema.parse(raw)
 		failureCount = 0
 		lastCallAt = Date.now()
-		cache.set(s, q)
+		setCachedQuote(q, cacheTtlSeconds)
 		if (flag('pricingDbCache')) {
 			try { await (db as any).quotes?.put(q) } catch {}
 		}
@@ -78,8 +84,8 @@ export async function getQuote(symbol: string, cacheTtlSeconds = cacheTtlSeconds
 	}
 }
 
-export function getCachedQuote(symbol: string): PriceQuote | undefined {
-	return cache.get(symbol)
+export function getLocalCachedQuote(symbol: string): PriceQuote | undefined {
+	return getCachedQuote(symbol) || undefined
 }
 
 export function getEffectivePrice(quote: PriceQuote): number {
@@ -91,27 +97,42 @@ export function getEffectivePrice(quote: PriceQuote): number {
 
 export async function getQuotesBatched(symbols: string[], cacheTtlSeconds = cacheTtlSecondsDefault): Promise<Map<string, PriceQuote>> {
 	const unique = Array.from(new Set(symbols.map((s) => tickerSchema.parse(s))))
-	const result = new Map<string, PriceQuote>()
+	
 	// Try cache first
+	const cachedQuotes = getCachedQuotes(unique)
 	const toFetch: string[] = []
+	
 	for (const s of unique) {
-		const cached = cache.get(s)
-		if (cached && differenceInSeconds(new Date(), new Date(cached.asOf)) <= cacheTtlSeconds) {
-			result.set(s, cached)
-		} else {
+		const cached = cachedQuotes.get(s.toUpperCase())
+		if (!cached || differenceInSeconds(new Date(), new Date(cached.asOf)) > cacheTtlSeconds) {
 			toFetch.push(s)
 		}
 	}
-	// Fallback to sequential fetch with built-in rate limiting; can be improved to real batch provider
-	for (const s of toFetch) {
+	
+	// If all found in cache, return early
+	if (toFetch.length === 0) {
+		trackMetric({ name: 'quote.batch.cache.full_hit', value: 1, tags: { count: unique.length.toString() } })
+		return cachedQuotes
+	}
+	
+	// Use unified batch provider for missing symbols
+	if (toFetch.length > 0) {
 		try {
-			const q = await getQuote(s, cacheTtlSeconds)
-			result.set(s, q)
+			const fetchedQuotes = await unifiedQuoteBatch(toFetch)
+			// Cache the fetched quotes
+			setCachedQuotes(fetchedQuotes, cacheTtlSeconds)
+			// Merge with cached quotes
+			for (const [symbol, quote] of fetchedQuotes.entries()) {
+				cachedQuotes.set(symbol, quote)
+			}
+			trackMetric({ name: 'quote.batch.partial_hit', value: 1, tags: { cached: (unique.length - toFetch.length).toString(), fetched: toFetch.length.toString() } })
 		} catch (e) {
-			// Skip symbol on failure; caller can handle missing entries
+			trackError('quote.batch.error', e, { symbols: toFetch.join(',') })
+			// Continue with partial results from cache
 		}
 	}
-	return result
+	
+	return cachedQuotes
 }
 
 

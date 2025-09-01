@@ -3,7 +3,7 @@ import VirtualList from '../components/VirtualList'
 import { listFeed, toggleLike, countLikes, addComment } from '../services/repos/socialRepo'
 import { useAuthStore } from '../stores/authStore'
 import Button from '../components/ui/Button'
-import PostCard from '../components/social/PostCard'
+import PostCard from '../components/social/PostCard.tsx'
 import CommentSection from '../components/social/CommentSection'
 
 type FeedItem = Awaited<ReturnType<typeof listFeed>>['items'][number]
@@ -15,6 +15,7 @@ function Social() {
 	const [likes, setLikes] = useState<Record<string, number>>({})
 	const [commentDraft, setCommentDraft] = useState<Record<string, string>>({})
 	const [loadingMore, setLoadingMore] = useState(false)
+    const [tab, setTab] = useState<'all' | 'friends' | 'mine'>('all')
 
 	useEffect(() => {
 		let cancelled = false
@@ -69,10 +70,20 @@ function Social() {
 			<CommentSection postId={p.id} value={commentDraft[p.id] ?? ''} onChange={(v) => setCommentDraft((d) => ({ ...d, [p.id]: v }))} onSubmit={onSubmitComment} />
 		</div>
 	)
+	const filtered = items.filter((p) => {
+		if (tab === 'mine') return p.userId === user?.id
+		return true // friends stub == all
+	})
+
 	return (
 		<div className="space-y-4 pb-16">
 			<h1 className="text-xl font-semibold">Social</h1>
-			<VirtualList items={items} rowHeight={118} height={520} renderRow={(it) => renderRow(it)} />
+			<div className="flex gap-2 text-sm">
+				<Button variant={tab==='all'?'secondary':'ghost'} size="sm" onClick={() => setTab('all')}>All</Button>
+				<Button variant={tab==='friends'?'secondary':'ghost'} size="sm" onClick={() => setTab('friends')}>Friends</Button>
+				<Button variant={tab==='mine'?'secondary':'ghost'} size="sm" onClick={() => setTab('mine')}>Mine</Button>
+			</div>
+			<VirtualList items={filtered} rowHeight={118} height={520} renderRow={(it) => renderRow(it)} />
 			<div className="pt-2">
 				{cursor ? (
 					<Button variant="secondary" size="sm" disabled={loadingMore} onClick={onLoadMore}>

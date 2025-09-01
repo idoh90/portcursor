@@ -1,4 +1,3 @@
-import { demoPinned, demoPosts } from '../services/fixtures'
 import { useEffect, useMemo, useState } from 'react'
 import { db } from '../services/db'
 import { useQuotesBatch } from '../hooks/useQuotes'
@@ -7,11 +6,16 @@ import { postBigMoveIfNeeded } from '../services/repos/bigMoveRepo'
 import Card from '../components/ui/Card'
 import PortfolioSummary from '../components/portfolio/PortfolioSummary'
 import Pinned from '../components/portfolio/PinnedTickers'
+import FriendsStrip from '../components/hub/FriendsStrip'
+import FeedPreview from '../components/hub/FeedPreview'
+import Button from '../components/ui/Button'
+import AddPositionDrawer from '../components/portfolio/AddPositionDrawer'
 
 function Hub() {
 	const [positions, setPositions] = useState<any[]>([])
 	const [lotsByPos, setLotsByPos] = useState<Record<string, any[]>>({})
 	const [portfolio, setPortfolio] = useState<any | null>(null)
+	const [openAdd, setOpenAdd] = useState(false)
 	useEffect(() => {
 		db.portfolios.toArray().then((pfs) => setPortfolio(pfs[0] ?? null))
 		db.positions.toArray().then(setPositions)
@@ -31,7 +35,7 @@ function Hub() {
 	useEffect(() => {
 		if (!portfolio) return
 		for (const p of positions) {
-			const q = quotes.get(p.symbol)
+			const q = quotes.get(p.symbol) as any
 			if (!q || q.last == null || q.prevClose == null || q.prevClose === 0) continue
 			const pct = ((q.last - q.prevClose) / q.prevClose) * 100
 			postBigMoveIfNeeded(portfolio.id, p.symbol, pct).catch(() => {})
@@ -42,16 +46,12 @@ function Hub() {
 			<h1 className="text-xl font-semibold">Hub</h1>
 			<PortfolioSummary totals={totals as any} />
 			<Pinned symbols={portfolio?.pinnedSymbols ?? []} />
-			<Card head="Latest posts">
-				<ul className="space-y-2 text-sm">
-					{demoPosts.map((p) => (
-						<li key={p.id} className="flex items-center justify-between">
-							<span>{p.displayName}</span>
-							<span className="text-zinc-500">{p.symbol}</span>
-						</li>
-					))}
-				</ul>
+			<Card head="Friends">
+				<FriendsStrip />
 			</Card>
+			<FeedPreview />
+			<Button className="fixed bottom-20 right-6 h-12 w-12 rounded-full shadow-lg" onClick={() => setOpenAdd(true)}>+</Button>
+			<AddPositionDrawer open={openAdd} onOpenChange={setOpenAdd} />
 		</div>
 	)
 }

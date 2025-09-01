@@ -4,9 +4,11 @@ import { listPortfoliosByUser } from '../services/repos/portfolioRepo'
 import { reorderPinnedSymbols, togglePinnedSymbol } from '../services/repos/pinnedRepo'
 import { exportUserDataJson, exportUserDataCsv, softDeleteUser, hardDeleteUser } from '../services/repos/dataRepo'
 import { useAuthStore } from '../stores/authStore'
+import { db } from '../services/db'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import { useSettingsStore } from '../features/settings/store'
 
 function Settings() {
 	const user = useAuthStore((s) => s.user)
@@ -14,6 +16,7 @@ function Settings() {
 	const updateDisplayName = useAuthStore((s) => s.updateDisplayName)
 	const changePin = useAuthStore((s) => s.changePin)
 	const logoutAllDevices = useAuthStore((s) => s.logoutAllDevices)
+	const { baseCurrency, setBaseCurrency, locale, setLocale } = useSettingsStore()
 	const [displayName, setDisplayName] = useState('')
 	const [pinOld, setPinOld] = useState('')
 	const [pinNew, setPinNew] = useState('')
@@ -40,16 +43,24 @@ function Settings() {
 	const [newPin, setNewPin] = useState('')
 
 	useEffect(() => {
-		if (!user) return
+		if (!user) {
+			console.log('No user found in Settings')
+			return
+		}
+		console.log('Loading settings for user:', user.id)
 		setDisplayName(user.displayName)
 		getPrivacy(user.id).then((p) => {
 			if (p) setForm((f) => ({ ...f, ...p }))
 		})
 		listPortfoliosByUser(user.id).then((ps) => {
+			console.log('Found portfolios for user:', ps)
 			const pf = ps[0]
 			if (pf) {
+				console.log('Setting portfolio ID:', pf.id, 'with pinned symbols:', pf.pinnedSymbols)
 				setPortfolioId(pf.id)
 				setPinned(pf.pinnedSymbols ?? [])
+			} else {
+				console.log('No portfolio found for user')
 			}
 		})
 	}, [user?.id])
@@ -79,13 +90,49 @@ function Settings() {
 	}
 
 	const onAddPin = async () => {
-		if (!newPin.trim() || !portfolioId) return
+		if (!newPin.trim()) {
+			console.log('No symbol entered')
+			return
+		}
+		if (!portfolioId) {
+			console.log('No portfolio ID found')
+			// Try to create a portfolio if none exists
+			if (user) {
+				console.log('Creating new portfolio for user:', user.id)
+				try {
+					const now = new Date().toISOString()
+					const pfId = `pf-${user.id}-${Math.random().toString(36).slice(2, 8)}`
+					const newPortfolio = {
+						id: pfId,
+						userId: user.id,
+						name: 'Main',
+						currency: 'USD' as const,
+						visibility: 'public' as const,
+						pinnedSymbols: [],
+						createdAt: now,
+						updatedAt: now
+					}
+					await db.portfolios.add(newPortfolio)
+					setPortfolioId(pfId)
+					console.log('Created portfolio:', pfId)
+					// Now add the pin
+					const next = await togglePinnedSymbol(pfId, newPin.trim().toUpperCase())
+					setPinned(next)
+					setNewPin('')
+				} catch (e) {
+					console.error('Error creating portfolio:', e)
+				}
+			}
+			return
+		}
+		console.log('Adding pin:', newPin.trim().toUpperCase(), 'to portfolio:', portfolioId)
 		try {
 			const next = await togglePinnedSymbol(portfolioId, newPin.trim().toUpperCase())
+			console.log('New pinned symbols:', next)
 			setPinned(next)
 			setNewPin('')
 		} catch (e) {
-			// noop UI for errors
+			console.error('Error adding pin:', e)
 		}
 	}
 
@@ -103,6 +150,20 @@ function Settings() {
 	return (
 		<div className="space-y-4 pb-16">
 			<h1 className="text-xl font-semibold">Settings</h1>
+			<Card className="space-y-3" head="Preferences">
+				<div className="grid grid-cols-2 gap-2 text-sm">
+					<label>Base currency</label>
+					<select className="rounded-md bg-zinc-900 border border-zinc-800 px-2 py-1 text-sm" value={baseCurrency} onChange={(e) => setBaseCurrency(e.target.value as any)}>
+						<option value="USD">USD</option>
+						<option value="ILS">ILS</option>
+					</select>
+					<label>Locale</label>
+					<select className="rounded-md bg-zinc-900 border border-zinc-800 px-2 py-1 text-sm" value={locale} onChange={(e) => setLocale(e.target.value as any)}>
+						<option value="en">English</option>
+						<option value="he">עברית</option>
+					</select>
+				</div>
+			</Card>
 			<Card className="space-y-3" head="Account">
 				<div className="grid grid-cols-2 gap-2 text-sm">
 					<label>Display name</label>
@@ -215,9 +276,23 @@ function Settings() {
 				</div>
 			</Card>
 			<Card className="space-y-3" head="Pinned tickers">
+				{!user && (
+					<div className="text-sm text-red-400">Please log in to manage pinned tickers</div>
+				)}
+				{user && !portfolioId && (
+					<div className="text-sm text-yellow-400">No portfolio found. Adding a ticker will create one.</div>
+				)}
+				{user && portfolioId && (
+					<div className="text-xs text-zinc-500">Portfolio: {portfolioId}</div>
+				)}
 				<div className="flex gap-2 text-sm">
-					<Input placeholder="Add ticker" value={newPin} onChange={(e) => setNewPin(e.target.value)} />
-					<Button variant="secondary" size="sm" onClick={onAddPin}>Add</Button>
+					<Input 
+						placeholder="Add ticker (e.g. AAPL)" 
+						value={newPin} 
+						onChange={(e) => setNewPin(e.target.value.toUpperCase())} 
+						disabled={!user}
+					/>
+					<Button variant="secondary" size="sm" onClick={onAddPin} disabled={!user || !newPin.trim()}>Add</Button>
 				</div>
 				<div className="space-y-2">
 					{pinned.map((s, i) => (
