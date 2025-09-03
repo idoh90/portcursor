@@ -5,6 +5,7 @@ import Hub from '../pages/Hub'
 import Social from '../pages/Social'
 import MyStocks from '../pages/MyStocks'
 import Settings from '../pages/Settings'
+import NewsPage from '../pages/news/NewsPage'
 import PublicProfile from '../pages/PublicProfile'
 import PositionDetail from '../pages/PositionDetail'
 import Login from '../pages/Login'
@@ -56,6 +57,7 @@ export default function AppRoutes() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={user ? <Hub /> : <Navigate to="/login" replace />} />
+            <Route path="/news" element={user ? <NewsPage /> : <Navigate to="/login" replace />} />
             <Route path="/social" element={user ? <Social /> : <Navigate to="/login" replace />} />
             <Route path="/me" element={user ? <MyStocks /> : <Navigate to="/login" replace />} />
             <Route path="/mystocks" element={user ? <MyStocks /> : <Navigate to="/login" replace />} />
