@@ -1,6 +1,7 @@
 export type Locale = 'en' | 'he';
 
 const en = {
+  news: 'News',
   hub: 'Hub',
   social: 'Social',
   myStocks: 'My Stocks',
@@ -12,6 +13,7 @@ const en = {
 };
 
 const he: typeof en = {
+  news: 'מחקר',
   hub: 'בית',
   social: 'רשת',
   myStocks: 'המניות שלי',

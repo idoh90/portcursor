@@ -3,8 +3,8 @@ import { useAuthStore } from '../../stores/authStore'
 import { t } from '../../lib/i18n'
 
 const items = [
+  { to: '/news', labelKey: 'news' as const },
   { to: '/', labelKey: 'hub' as const },
-  { to: '/social', labelKey: 'social' as const },
   { to: '/me', labelKey: 'myStocks' as const },
   { to: '/settings', labelKey: 'settings' as const },
 ]
