@@ -9,6 +9,7 @@ const en = {
   totalValue: 'Total Value',
   totalPnL: 'Total P/L',
   today: 'Today',
+  news: 'News',
 };
 
 const he: typeof en = {

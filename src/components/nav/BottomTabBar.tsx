@@ -3,6 +3,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { t } from '../../lib/i18n'
 
 const items = [
+  { to: '/news', labelKey: 'news' as const },
   { to: '/', labelKey: 'hub' as const },
   { to: '/social', labelKey: 'social' as const },
   { to: '/me', labelKey: 'myStocks' as const },
@@ -20,7 +21,7 @@ export default function BottomTabBar() {
   
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-800 bg-zinc-950/80 backdrop-blur">
-      <div className="mx-auto grid max-w-md grid-cols-4 text-center text-xs">
+      <div className="mx-auto grid max-w-md grid-cols-5 text-center text-xs">
         {items.map((it) => {
           const active = pathname === it.to || (it.to === '/me' && pathname === '/mystocks')
           return (
