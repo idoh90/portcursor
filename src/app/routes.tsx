@@ -11,6 +11,7 @@ import Login from '../pages/Login'
 import Register from '../pages/Register'
 import Profile from '../pages/Profile'
 import Layout from '../components/layout/Layout'
+import NewsPage from '../pages/news/NewsPage'
 
 // Loading component
 function Loading() {
@@ -60,6 +61,7 @@ export default function AppRoutes() {
             <Route path="/me" element={user ? <MyStocks /> : <Navigate to="/login" replace />} />
             <Route path="/mystocks" element={user ? <MyStocks /> : <Navigate to="/login" replace />} />
             <Route path="/settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
+            <Route path="/news" element={user ? <NewsPage /> : <Navigate to="/login" replace />} />
             <Route path="/u/:handle" element={<PublicProfile />} />
             <Route path="/profile/:name" element={<Profile />} />
             <Route path="/position/:id" element={<PositionDetail />} />
