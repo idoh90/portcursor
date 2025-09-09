@@ -4,7 +4,7 @@ type Props<T> = {
 	items: T[]
 	rowHeight: number
 	height: number
-	renderRow: (item: T, index: number) => JSX.Element
+	renderRow: (item: T, index: number) => React.ReactElement
 }
 
 export default function VirtualList<T>({ items, rowHeight, height, renderRow }: Props<T>) {

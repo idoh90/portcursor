@@ -11,7 +11,7 @@ type SocialState = {
   addComment: (postId: string, userId: string, text: string) => Promise<void>
 }
 
-export const useSocialStore = create<SocialState>((set, get) => ({
+export const useSocialStore = create<SocialState>((set) => ({
   posts: [],
   commentsByPost: {},
   loading: false,

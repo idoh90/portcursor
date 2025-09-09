@@ -1,4 +1,4 @@
-import type { Position, Lot } from '../features/portfolio/types';
+import type { Position } from '../features/portfolio/types';
 
 function sum(numbers: number[]): number { return numbers.reduce((a, b) => a + b, 0); }
 
@@ -45,7 +45,7 @@ export function unrealizedPnL(position: Position, livePrice: number): { abs: num
   const { avg } = avgCost(position);
   const qty = quantityOpen(position);
   if (qty === 0) return { abs: 0, pct: 0 };
-  const abs = (Number.isFinite(livePrice) ? livePrice : 0 - avg) * qty + (avg * qty - avg * qty);
+  // const abs = (Number.isFinite(livePrice) ? livePrice : 0 - avg) * qty + (avg * qty - avg * qty);
   const mv = qty * (Number.isFinite(livePrice) ? livePrice : 0);
   const cost = avg * qty;
   const pct = cost === 0 ? 0 : ((mv - cost) / cost) * 100;

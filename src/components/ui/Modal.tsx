@@ -1,14 +1,16 @@
 import React from 'react'
 
 export interface ModalProps {
-	open: boolean
+	isOpen?: boolean
+	open?: boolean
 	onClose: () => void
 	title?: string
 	children?: React.ReactNode
 }
 
-export default function Modal({ open, onClose, title, children }: ModalProps) {
-	if (!open) return null
+export default function Modal({ isOpen, open, onClose, title, children }: ModalProps) {
+	const isVisible = isOpen ?? open
+	if (!isVisible) return null
 	return (
 		<div className="fixed inset-0 z-50">
 			<button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/70" />

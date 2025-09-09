@@ -3,7 +3,7 @@ import { useAuthStore } from '../stores/authStore'
 import { Suspense } from 'react'
 import Hub from '../pages/Hub'
 import Social from '../pages/Social'
-import MyStocks from '../pages/MyStocks'
+import Investments from '../pages/Investments'
 import Settings from '../pages/Settings'
 import PublicProfile from '../pages/PublicProfile'
 import PositionDetail from '../pages/PositionDetail'
@@ -57,8 +57,9 @@ export default function AppRoutes() {
             <Route path="/register" element={<Register />} />
             <Route path="/" element={user ? <Hub /> : <Navigate to="/login" replace />} />
             <Route path="/social" element={user ? <Social /> : <Navigate to="/login" replace />} />
-            <Route path="/me" element={user ? <MyStocks /> : <Navigate to="/login" replace />} />
-            <Route path="/mystocks" element={user ? <MyStocks /> : <Navigate to="/login" replace />} />
+            <Route path="/me" element={user ? <Investments /> : <Navigate to="/login" replace />} />
+            <Route path="/mystocks" element={user ? <Investments /> : <Navigate to="/login" replace />} />
+            <Route path="/investments" element={user ? <Investments /> : <Navigate to="/login" replace />} />
             <Route path="/settings" element={user ? <Settings /> : <Navigate to="/login" replace />} />
             <Route path="/u/:handle" element={<PublicProfile />} />
             <Route path="/profile/:name" element={<Profile />} />

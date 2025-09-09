@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { db } from '../services/db'
 import { useQuotesBatch } from '../hooks/useQuotes'
 import { computePositionMetrics } from '../services/positions/plEngine'
@@ -11,6 +12,7 @@ function MyStocks() {
 	const [lotsByPosition, setLotsByPosition] = useState<Record<string, any[]>>({})
 	const [search, setSearch] = useState('')
 	const [sort, setSort] = useState<'symbol' | 'value' | 'pnl'>('symbol')
+	const navigate = useNavigate()
 	useEffect(() => {
 		db.positions.toArray().then((ps) => setPositions(ps.map((p) => ({ id: p.id, symbol: p.symbol }))))
 	}, [])
@@ -53,7 +55,7 @@ function MyStocks() {
 			<h1 className="text-xl font-semibold">My Stocks</h1>
 			<div className="flex gap-2">
 				<Input placeholder="Search symbol" value={search} onChange={(e) => setSearch(e.target.value)} />
-				<select className="rounded-md bg-zinc-900 border border-zinc-800 px-2 py-1 text-sm" value={sort} onChange={(e) => setSort(e.target.value)}>
+				<select className="rounded-md bg-zinc-900 border border-zinc-800 px-2 py-1 text-sm" value={sort} onChange={(e) => setSort(e.target.value as 'symbol' | 'value' | 'pnl')}>
 					<option value="symbol">A–Z</option>
 					<option value="value">By Value</option>
 					<option value="pnl">By P/L</option>
@@ -76,6 +78,7 @@ function MyStocks() {
 								unrealized={metrics?.unrealizedPL ?? null}
 								today={metrics?.todayChange ?? null}
 								isStale={!quote || quote.last == null}
+								onClick={() => navigate(`/position/${p.id}`)}
 							/>
 						)
 					})

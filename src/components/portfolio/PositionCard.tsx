@@ -7,13 +7,20 @@ export interface PositionCardProps {
 	unrealized?: number | null
 	today?: number | null
 	isStale?: boolean
+	onClick?: () => void
 }
 
-export default function PositionCard({ symbol, quantity, avgCost, unrealized, today, isStale }: PositionCardProps) {
+export default function PositionCard({ symbol, quantity, avgCost, unrealized, today, isStale, onClick }: PositionCardProps) {
 	const unrealClass = (unrealized ?? 0) > 0 ? 'text-emerald-400' : (unrealized ?? 0) < 0 ? 'text-red-400' : 'text-zinc-200'
 	const todayClass = (today ?? 0) > 0 ? 'text-emerald-400' : (today ?? 0) < 0 ? 'text-red-400' : 'text-zinc-200'
 	return (
-		<Card className={[isStale ? 'opacity-70' : 'opacity-100'].join(' ')}>
+		<Card 
+			className={[
+				isStale ? 'opacity-70' : 'opacity-100',
+				onClick ? 'cursor-pointer hover:border-zinc-600 transition-colors' : ''
+			].join(' ')}
+			onClick={onClick}
+		>
 			<div className="flex items-center justify-between">
 				<div className="font-medium text-zinc-200">{symbol}</div>
 				<div className="text-sm text-zinc-400">Qty: {quantity ?? '-'}</div>
@@ -25,6 +32,9 @@ export default function PositionCard({ symbol, quantity, avgCost, unrealized, to
 		</Card>
 	)
 }
+
+
+
 
 
 

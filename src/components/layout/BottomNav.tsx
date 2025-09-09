@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 const items = [
 	{ to: '/', label: 'Hub' },
 	{ to: '/social', label: 'Social' },
-	{ to: '/mystocks', label: 'My Stocks' },
+	{ to: '/mystocks', label: 'Investments' },
 	{ to: '/settings', label: 'Settings' },
 ]
 

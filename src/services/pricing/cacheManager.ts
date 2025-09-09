@@ -1,4 +1,3 @@
-import { differenceInSeconds, differenceInMinutes } from 'date-fns'
 import type { PriceQuote } from '../../models/types'
 
 interface CacheEntry<T> {

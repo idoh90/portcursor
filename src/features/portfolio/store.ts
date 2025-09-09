@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { Position } from './types'
 import { db } from '../../services/db'
-import { addLot as repoAddLot, deleteLot as repoDeleteLot, createPosition as repoCreatePosition, updatePosition as repoUpdatePosition, listLots as repoListLots } from '../../services/repos/positionRepo'
+import { addLot as repoAddLot, deleteLot as repoDeleteLot, createPosition as repoCreatePosition, updatePosition as repoUpdatePosition } from '../../services/repos/positionRepo'
 
 type PortfolioState = {
   positions: Position[]

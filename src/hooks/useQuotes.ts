@@ -1,5 +1,6 @@
-import { useQuery, useQueries } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getQuote, getQuotesBatched } from '../services/pricing/priceService'
+import type { PriceQuote } from '../models/types'
 
 export function useQuote(symbol: string) {
 	return useQuery({
@@ -20,7 +21,7 @@ export function useQuotesBatch(symbols: string[]) {
 		refetchInterval: 30_000,
 		retry: 2,
 	})
-	return data ?? new Map<string, ReturnType<typeof useQuery>['data']>()
+	return data ?? new Map<string, PriceQuote>()
 }
 
 

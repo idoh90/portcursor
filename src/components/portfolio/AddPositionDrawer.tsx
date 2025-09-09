@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
 import Card from '../ui/Card'
-import { listPortfoliosByUser, createPortfolio } from '../../services/repos/portfolioRepo'
+import { createPortfolio } from '../../services/repos/portfolioRepo'
 import { createPosition } from '../../services/repos/positionRepo'
 import { db } from '../../services/db'
 

@@ -1,5 +1,4 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useAuthStore } from '../../stores/authStore'
 import { t } from '../../lib/i18n'
 
 const items = [
@@ -11,7 +10,6 @@ const items = [
 
 export default function BottomTabBar() {
   const { pathname } = useLocation()
-  const user = useAuthStore((s) => s.user)
   
   // Don't show bottom nav on login/register pages
   if (pathname === '/login' || pathname === '/register') {
